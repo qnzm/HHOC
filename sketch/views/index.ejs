@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html> 
 	<head>
 	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js" ></script>
@@ -11,8 +12,10 @@
 			}
 
 			var msg = $('#msg'),
-			list = $('#list'),
-			frm = $('#form'),
+			list    = $('#list'),
+			frm     = $('#form'),
+			canvas  = $('#canvas'),
+			message = $('#message');
 
 			socket = io.connect(url)
 			socket.on('ret', function (data) {
@@ -25,6 +28,45 @@
 				return false;
 			});
 			socket.json.emit('start', new Date().getTime().toString());
+
+			$('#draw').click(function(){
+				var c = document.getElementById('canvas');
+				var ctx = c.getContext('2d');
+				ctx.strokeRect(0, 0, c.width, c.height);
+			});
+
+			var drawFlag = false;
+			var oldX = 0,
+			oldY     = 0;
+			can = document.getElementById('canvas');
+			can.addEventListener('mousemove', draw, true);
+			can.addEventListener('mousedown', function(e){
+				drawFlag = true;
+				oldX = e.clientX;
+				oldY = e.clientY;
+			}, false);
+			can.addEventListener('mouseup', function(e){
+				drawFlag = false;
+			}, false);
+
+			function draw(e){
+				if(!drawFlag) return;
+				var x = e.clientX,
+				y     = e.clientY;
+				message.text('(' + oldX + ',' + oldY + ') -> (' + x + ',' + y + ')');
+
+				var c = document.getElementById('canvas');
+				var ctx = c.getContext('2d');
+				ctx.storokeStyle = "rgba(255,0,0,1)";
+				ctx.lineWidth = 2;
+				ctx.beginPath();
+				ctx.moveTo(oldX, oldY);
+				ctx.lineTo(x, y);
+				ctx.stroke();
+				ctx.closePath();
+				oldX = x;
+				oldY = y;
+			}
 		});
 	</script>
 	<link rel='stylesheet' href='/stylesheets/style.css' />
@@ -36,7 +78,10 @@
 		<input type="text" id="msg" size="40" />
 		<input type="submit" id="push" value="push" />
 	</form>
+	<a id="draw">click</a>
+	<div id="message"></div>
 	<ul id="list"></ul>
+
 	<canvas id="canvas" ></canvas>
 </body>
 </html>
