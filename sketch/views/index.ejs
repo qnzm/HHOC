@@ -1,0 +1,43 @@
+<html> 
+	<head>
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.js" ></script>
+	<script src="/socket.io/socket.io.js"></script>
+	<script>
+		$(document).ready(function(){
+			var url = 'http://10.29.2.146';
+			function put(data){
+				var date = new Date();
+				list.prepend($('<li>' + data.name + ": " + data.value + ' (' + date + ')</li>'));
+			}
+
+			var msg = $('#msg'),
+			list = $('#list'),
+			frm = $('#form'),
+
+			socket = io.connect(url)
+			socket.on('ret', function (data) {
+				put(data);
+			});
+			frm.submit(function(){
+				socket.emit('push', { value: msg.val() });
+				put({ name: 'mine', value: msg.val()});
+				msg.val('');
+				return false;
+			});
+			socket.json.emit('start', new Date().getTime().toString());
+		});
+	</script>
+	<link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body>
+	<h1><%= title %></h1>
+	<p>Welcome to <%= title %></p>
+	<form action="" id="form">
+		<input type="text" id="msg" size="40" />
+		<input type="submit" id="push" value="push" />
+	</form>
+	<ul id="list"></ul>
+	<canvas id="canvas" ></canvas>
+</body>
+</html>
+
